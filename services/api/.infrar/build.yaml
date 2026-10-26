@@ -4,8 +4,6 @@ dockerfile: Dockerfile
 env:
   - name: PORT
     default: "8083"
-  - name: DATABASE_URL
-    from: orbit
   - name: MAIL_API_KEY
     secret: true
   - name: MAIL_FROM
@@ -13,5 +11,9 @@ env:
 run:
   api_prefix: /api
 requires:
-  db:
+  orbit:
     product: postgres
+    version: "16"
+    tenancy: database
+    env:
+      DATABASE_URL: url

@@ -11,13 +11,13 @@ execution target. This is not a node of the repository: nothing here is built or
 
 | Declaration | Product | Version | Tenancy | Origin |
 |---|---|---|---|---|
-| `db` | postgres | any | default |  |
+| `orbit` | postgres | 16 | database | `deploy/main.tf` (`aws_db_instance.orbit`) |
 
 ## Requirements → declarations
 
 | Node | Requirement | Declaration |
 |---|---|---|
-| `api` | `db` | `db` |
+| `api` | `orbit` | `orbit` |
 
 ## What you may edit
 

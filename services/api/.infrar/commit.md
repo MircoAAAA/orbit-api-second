@@ -3,33 +3,16 @@ schema_version: 1
 id: 0d8f6ec5-0116-46c7-93de-f9959f56f546
 name: api
 node: services/api
-branch: develop
-previous_commit: c024dec79c8b52c513c4d252f13c5b04fec12c0e
+branch: main
+previous_commit: 28a40aef6ff34d1cca321b02d9b450225cceb2a3
 ---
 
 ## What changed
 
-- `src/server.js`: all application routes are now registered inside an
-  encapsulated Fastify plugin mounted with `{ prefix: '/api' }`, so the
-  service serves `GET /api/health`, `GET/POST /api/tasks`,
-  `POST /api/tasks/:id/share`, `GET /api/quiz/stream` and
-  `POST /api/quiz/broadcast`. Route handlers, validation, storage and
-  mail logic are unchanged — only where the routes are mounted moved.
-- A bare `GET /health` (same handler as `/api/health`) remains at the
-  root for the pod's own container healthcheck, which probes the path
-  declared in `.infrar/build.yaml` (`/health`) directly, not through the
-  preview router.
-- `.infrar/knowledge.md`: Behavior section rewritten to document the
-  `/api` base path and the extra unprefixed health route.
+- `services/api/.infrar/build.yaml`: the requirement `db` (product only) becomes `orbit` — product `postgres`, version `16`, `tenancy: database`, projecting `DATABASE_URL` as `url`. The former `env:` entry `DATABASE_URL` (`from: orbit`), which never pointed at `db`, is replaced by that projection.
+- `.infrar/environment/`: `module "db"` (no version) becomes `module "orbit"` (`infrar/postgres`, `product_version = "16"`, `tenancy = "database"`); `outputs.tf` and `README.md` follow the rename.
+- `.infrar/knowledge.md`: the build spec row, the Consumes line and the two wiring notes now describe the `orbit` requirement.
 
 ## Why
 
-The preview routing convention forwards `/api/*` from the web origin to
-this service without stripping the prefix. With routes served at the
-root, every frontend call (`/api/tasks`, `/api/health`,
-`/api/tasks/:id/share`) reached the service with the `/api` prefix still
-present and answered 404. Serving under `/api` matches what the frontend
-already requests; no frontend, port, proxy or build-spec change is
-needed (`run.api_prefix` is omitted, which already means the `/api`
-default, and the healthcheck path `/health` still matches the kept
-unprefixed route).
+The api code speaks to Postgres through `pg` (8.22.0 in the lockfile) and reads its connection from `DATABASE_URL` only. The repository names the instance `orbit` (`aws_db_instance.orbit`, `db_name = "orbit"`) and pins `engine_version = "16"` in `deploy/main.tf`; version 16 is in the catalog, `pg` 8.x supports it, and the SQL in `src/server.js` needs nothing newer than Postgres 9.5. Declaring the requirement and its module lets Environment realise the database instead of relying on an implicit wiring.

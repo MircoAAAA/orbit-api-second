@@ -5,6 +5,8 @@
 # freely; Infrar re-reads this file. Anything OpenTofu accepts is accepted here too; only a
 # literal value, a tenant id, a hostname, a backend or a provider credential is refused.
 
-module "db" {
-  source = "infrar/postgres"
+module "orbit" {
+  source          = "infrar/postgres"
+  product_version = "16"
+  tenancy         = "database"
 }
